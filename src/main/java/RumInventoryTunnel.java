@@ -99,14 +99,73 @@ public class RumInventoryTunnel implements Tunnel{
         return amtOfRum;
     }
 
-    @Override
+    /**
+     * Add a barrel with amtOfRum to the tunnel from House B
+     * This method runs in O(1) time
+     * @param amtOfRum the amount of rum in this barrel
+     */
     public void addB(int amtOfRum) {
-
+        if (amtOfRum < MIN_VOLUME || MAX_VOLUME < amtOfRum){
+            throw new IllegalArgumentException("Argument must be integer between 0 and 100 inclusive");
+        }
+        if (size == MAX_TUNNEL_CAPACITY){throw new IndexOutOfBoundsException("Maximum Tunnel capacity reached");}
+        Barrel newBarrel = new Barrel();
+        newBarrel.volume = amtOfRum;
+        if(size % 2 == 1){
+            newBarrel.next = middle;
+            newBarrel.previous = middle.previous;
+            middle.previous.next = newBarrel;
+            middle.previous = newBarrel;
+            middle = newBarrel;
+        }
+        else if (size % 2 == 0){
+            newBarrel.next = middle.next;
+            newBarrel.previous = middle;
+            middle.next.previous = newBarrel;
+            middle.next = newBarrel;
+            middle = newBarrel;
+        }
+        size++;
     }
 
-    @Override
+    /**
+     * Remove a barrel from the tunnel through House B
+     * This method runs in O(1) time
+     * throws NoSuchElement exception if the tunnel is empty
+     * @return the amount of rum in the barrel that is removed
+     */
     public int removeB() {
-        return 0;
+        if(middle == null){throw new NoSuchElementException();}
+        int amtOfRum = middle.volume;
+
+        if (size == 1){
+            first = null;
+            middle = null;
+            last = null;
+        }
+        else if(size == 2){
+            last.previous = null;
+            last.next = null;
+            middle = last;
+            first = last;
+        }
+        else if(size == 3){
+            first.next = last;
+            last.previous = first;
+            middle = first;
+        }
+        else{
+            middle.previous.next = middle.next;
+            middle.next.previous = middle.previous;
+            if (size % 2 == 1){
+                middle = middle.previous;
+            }
+            else if (size % 2 == 0){
+                middle = middle.next;
+            }
+        }
+        size --;
+        return amtOfRum ;
     }
 
     /**
@@ -179,7 +238,10 @@ public class RumInventoryTunnel implements Tunnel{
         return amtOfRum;
     }
 
-    @Override
+    /**
+     * A simple getter method to return the size of the rum barrel inventory
+     * @return the number of barrels in the tunnel
+     */
     public int size() {
         return size;
     }
