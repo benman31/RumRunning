@@ -39,6 +39,7 @@ public class RumInventoryTunnel implements Tunnel{
         if (amtOfRum < MIN_VOLUME || MAX_VOLUME < amtOfRum){
             throw new IllegalArgumentException("Argument must be integer between 0 and 100 inclusive");
         }
+        if (size == MAX_TUNNEL_CAPACITY){throw new IndexOutOfBoundsException("Maximum Tunnel capacity reached");}
         Barrel newBarrel = new Barrel();
         newBarrel.volume = amtOfRum;
         newBarrel.next = first;
@@ -49,10 +50,26 @@ public class RumInventoryTunnel implements Tunnel{
         }
         else{first.previous = newBarrel;}
         first = newBarrel;
-        upSize();
+        size++;
+        if (size == 2){
+            middle = first;
+            last = first.next;
+        }
+        else if (size == 3){
+            middle = first.next;
+            last = middle.next;
+        }
+        else if (size > 3 && size % 2 == 0){
+            middle = middle.previous;
+        }
     }
 
-    @Override
+    /**
+     * Remove a barrel from the tunnel through House A
+     * This method runs in O(1) time
+     * throws NoSuchElement exception if the tunnel is empty
+     * @return the amount of rum in the barrel that is removed
+     */
     public int removeA() {
         if (first == null){throw new NoSuchElementException();}
         int amtOfRum = first.volume;
@@ -62,7 +79,23 @@ public class RumInventoryTunnel implements Tunnel{
             last = null;
         }
         else{first.previous = null;}
-        downSize();
+
+        size--;
+        if (size == 1){
+            middle = first;
+            last = first;
+        }
+        else if (size == 2){
+            middle = first;
+            last = first.next;
+        }
+        else if (size == 3){
+            middle = first.next;
+            last = middle.next;
+        }
+        else if (size > 3 && size % 2 == 1){
+            middle = middle.next;
+        }
         return amtOfRum;
     }
 
@@ -76,14 +109,74 @@ public class RumInventoryTunnel implements Tunnel{
         return 0;
     }
 
-    @Override
+    /**
+     * Add a barrel with amtOfRum to the tunnel from House C
+     * This method runs in O(1) time
+     * @param amtOfRum the amount of rum in this barrel
+     */
     public void addC(int amtOfRum) {
+        if (amtOfRum < MIN_VOLUME || MAX_VOLUME < amtOfRum){
+            throw new IllegalArgumentException("Argument must be integer between 0 and 100 inclusive");
+        }
+        if (size == MAX_TUNNEL_CAPACITY){throw new IndexOutOfBoundsException("Maximum Tunnel capacity reached");}
+        Barrel newBarrel = new Barrel();
+        newBarrel.volume = amtOfRum;
+        newBarrel.previous = last;
+        newBarrel.next = null;
+        if(last == null){
+            first = newBarrel;
+            middle = newBarrel;
+        }
+        else{last.next = newBarrel;}
+        last = newBarrel;
+        size++;
+
+        if (size == 2){
+            middle = last.previous;
+            first = last.previous;
+        }
+        else if (size == 3){
+            middle = last.previous;
+            first = middle.previous;
+        }
+        else if (size > 3 && size % 2 == 1){
+            middle = middle.next;
+        }
 
     }
-
-    @Override
+    /**
+     * Remove a barrel from the tunnel through House C
+     * This method runs in O(1) time
+     * throws NoSuchElement exception if the tunnel is empty
+     * @return the amount of rum in the barrel that is removed
+     */
     public int removeC() {
-        return 0;
+        if (last == null){throw new NoSuchElementException();}
+        int amtOfRum = last.volume;
+        last = last.previous;
+        if (last == null){
+            middle = null;
+            first = null;
+        }
+        else{last.next = null;}
+
+        size--;
+        if (size == 1){
+            middle = last;
+            first = last;
+        }
+        else if (size == 2){
+            middle = last.previous;
+            first = last.previous;
+        }
+        else if (size == 3){
+            middle = last.previous;
+            first = middle.previous;
+        }
+        else if (size > 3 && size % 2 == 0){
+            middle = middle.previous;
+        }
+        return amtOfRum;
     }
 
     @Override
@@ -120,7 +213,7 @@ public class RumInventoryTunnel implements Tunnel{
             middle = first.next;
             last = middle.next;
         }
-        if (size > 3 && size % 2 == 1){
+        else if (size > 3 && size % 2 == 1){
             middle = middle.next;
         }
     }
@@ -138,7 +231,7 @@ public class RumInventoryTunnel implements Tunnel{
             middle = first.next;
             last = middle.next;
         }
-        if (size > 3 && size % 2 == 0){
+        else if (size > 3 && size % 2 == 0){
             middle = middle.previous;
         }
     }
