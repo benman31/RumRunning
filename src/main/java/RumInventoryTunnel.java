@@ -1,4 +1,3 @@
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -52,14 +51,14 @@ public class RumInventoryTunnel implements Tunnel{
         first = newBarrel;
         size++;
         if (size == 2){
-            middle = first;
+            middle = first.next;
             last = first.next;
         }
         else if (size == 3){
             middle = first.next;
             last = middle.next;
         }
-        else if (size > 3 && size % 2 == 0){
+        else if (size > 3 && size % 2 == 1){
             middle = middle.previous;
         }
     }
@@ -86,7 +85,7 @@ public class RumInventoryTunnel implements Tunnel{
             last = first;
         }
         else if (size == 2){
-            middle = first;
+            middle = first.next;
             last = first.next;
         }
         else if (size == 3){
@@ -94,7 +93,7 @@ public class RumInventoryTunnel implements Tunnel{
             last = middle.next;
         }
         else if (size > 3 && size % 2 == 1){
-            middle = middle.next;
+            middle = middle.previous;
         }
         return amtOfRum;
     }
@@ -111,21 +110,40 @@ public class RumInventoryTunnel implements Tunnel{
         if (size == MAX_TUNNEL_CAPACITY){throw new IndexOutOfBoundsException("Maximum Tunnel capacity reached");}
         Barrel newBarrel = new Barrel();
         newBarrel.volume = amtOfRum;
-        if(size % 2 == 1){
-            newBarrel.next = middle;
-            newBarrel.previous = middle.previous;
-            middle.previous.next = newBarrel;
-            middle.previous = newBarrel;
+        size++;
+        if(size == 1){
+            first = newBarrel;
+            middle = newBarrel;
+            last = newBarrel;
+        }
+        else if (size == 2){
+            first.next = newBarrel;
+            newBarrel.previous = first;
+            middle = newBarrel;
+            last = newBarrel;
+        }
+        else if (size == 3){
+            newBarrel.previous = first;
+            newBarrel.next = last;
+            first.next = newBarrel;
+            last.previous = newBarrel;
             middle = newBarrel;
         }
-        else if (size % 2 == 0){
+        else if(size % 2 == 0){
             newBarrel.next = middle.next;
             newBarrel.previous = middle;
             middle.next.previous = newBarrel;
             middle.next = newBarrel;
             middle = newBarrel;
         }
-        size++;
+        else if (size % 2 == 1){
+            newBarrel.next = middle;
+            newBarrel.previous = middle.previous;
+            middle.previous.next = newBarrel;
+            middle.previous = newBarrel;
+            middle = newBarrel;
+        }
+
     }
 
     /**
@@ -144,24 +162,23 @@ public class RumInventoryTunnel implements Tunnel{
             last = null;
         }
         else if(size == 2){
-            last.previous = null;
-            last.next = null;
-            middle = last;
-            first = last;
+            first.next = null;
+            middle = first;
+            last = first;
         }
         else if(size == 3){
             first.next = last;
             last.previous = first;
-            middle = first;
+            middle = last;
         }
         else{
             middle.previous.next = middle.next;
             middle.next.previous = middle.previous;
             if (size % 2 == 1){
-                middle = middle.previous;
+                middle = middle.next;
             }
             else if (size % 2 == 0){
-                middle = middle.next;
+                middle = middle.previous;
             }
         }
         size --;
@@ -191,14 +208,14 @@ public class RumInventoryTunnel implements Tunnel{
         size++;
 
         if (size == 2){
-            middle = last.previous;
+            middle = last;
             first = last.previous;
         }
         else if (size == 3){
             middle = last.previous;
             first = middle.previous;
         }
-        else if (size > 3 && size % 2 == 1){
+        else if (size > 3 && size % 2 == 0){
             middle = middle.next;
         }
 
@@ -225,7 +242,7 @@ public class RumInventoryTunnel implements Tunnel{
             first = last;
         }
         else if (size == 2){
-            middle = last.previous;
+            middle = last;
             first = last.previous;
         }
         else if (size == 3){
@@ -233,7 +250,7 @@ public class RumInventoryTunnel implements Tunnel{
             first = middle.previous;
         }
         else if (size > 3 && size % 2 == 0){
-            middle = middle.previous;
+            middle = middle.next;
         }
         return amtOfRum;
     }
@@ -248,60 +265,68 @@ public class RumInventoryTunnel implements Tunnel{
 
     @Override
     public int get(int index) {
-        return 0;
+        if (size == 0){throw new NoSuchElementException("Tunnel is empty");}
+        else if (index > size -1 ){throw new NoSuchElementException("Index out of bounds, index must be between zero and" + (size -1));}
+        else if (index < 0){throw new NoSuchElementException("Index out of bounds, index must be between zero and" + (size -1));}
+
+        int result = 0;
+        Iterator<Integer> tunnelIter = this.iterator();
+        for (int i = 0; i <= index; i++){
+            result = tunnelIter.next();
+        }
+        return result;
     }
 
     class Barrel{
 
-        public int volume;
+        public Integer volume;
         public Barrel next;
         public Barrel previous;
     }
 
-    /**
-     * A helper method that decrements the size of the Barrel list and updates the first, middle and last references
-     */
-    private void downSize(){
-        size--;
-        if (size == 1){
-            middle = first;
-            last = first;
-        }
-        else if (size == 2){
-            middle = first;
-            last = first.next;
-        }
-        else if (size == 3){
-            middle = first.next;
-            last = middle.next;
-        }
-        else if (size > 3 && size % 2 == 1){
-            middle = middle.next;
-        }
-    }
-
-    /**
-     * A helper method that increments the size of the Barrel list and updates the first, middle and last references
-     */
-    private void upSize(){
-        size++;
-        if (size == 2){
-            middle = first;
-            last = first.next;
-        }
-       else if (size == 3){
-            middle = first.next;
-            last = middle.next;
-        }
-        else if (size > 3 && size % 2 == 0){
-            middle = middle.previous;
-        }
-    }
-
     @Override
     public Iterator<Integer> iterator() {
-        //this just added to allow the code to compile
-        //remove this an replace with proper solution
-        return Collections.singletonList(0).iterator();
+
+        return new TunnelIterator<>();
     }
+
+    class TunnelIterator<Integer> implements Iterator<Integer> {
+
+        private Barrel position;
+        //private Barrel previous;
+        //private boolean isAfterNext;
+
+        public TunnelIterator(){
+            position = null;
+            //previous = null;
+            //isAfterNext = false;
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (position == null){
+                return first != null;
+            }
+            else{
+                return position.next != null;
+            }
+        }
+
+        @Override
+        public Integer next() {
+            if(hasNext() == false){throw new NoSuchElementException();}
+            //isAfterNext = true;
+            //previous = position;
+
+            if(position == null)
+            {
+                position = first;
+            }
+            else{
+                position = position.next;
+            }
+            return (Integer) position.volume;
+        }
+    }
+
 }
