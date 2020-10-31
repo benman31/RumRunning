@@ -2,14 +2,17 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- Add comments about this class here
- it is currently just stubs methods waiting to be completed
+ RumInventoryTunnel is a doubly LinkedList with the addition of a middle reference which allows nodes (called Barrels)
+ to be added to the middle of the LinkedList in addition to the typical methods for adding to the first and last positions
+ of the list. The class makes use of private internal classes for the node (Barrel class) and iterator(TunnelIterator).
+ The iterator is one-directional from nodes 0 to N and serves only to support the get() method which allows a
+ node at a given index to be accessed and the data retrieved. All add and remove methods operate with a constant number
+ of primitive operations therefore they are all O(1). The get method is O(n) because in the worst case must iterate through
+ n-1 elements to reach a given index.
  */
 public class RumInventoryTunnel implements Tunnel{
 
     private final int MAX_TUNNEL_CAPACITY;
-    public final int MAX_VOLUME;
-    public final int MIN_VOLUME;
 
     private int size;
     private Barrel first;
@@ -21,8 +24,6 @@ public class RumInventoryTunnel implements Tunnel{
      */
     public RumInventoryTunnel() {
         MAX_TUNNEL_CAPACITY = 1000000000;
-        MAX_VOLUME = 100;
-        MIN_VOLUME = 0;
         size = 0;
         first = null;
         middle = null;
@@ -30,14 +31,11 @@ public class RumInventoryTunnel implements Tunnel{
     }
 
     /**
-     * Add a barrel with amtOfRum to the tunnel from House A
+     * Add a barrel with amtOfRum to the tunnel from House A and adjust neighboring reference variables
      * This method runs in O(1) time
      * @param amtOfRum the amount of rum in this barrel
      */
     public void addA(int amtOfRum) {
-        if (amtOfRum < MIN_VOLUME || MAX_VOLUME < amtOfRum){
-            throw new IllegalArgumentException("Argument must be integer between 0 and 100 inclusive");
-        }
         if (size == MAX_TUNNEL_CAPACITY){throw new IndexOutOfBoundsException("Maximum Tunnel capacity reached");}
         Barrel newBarrel = new Barrel();
         newBarrel.volume = amtOfRum;
@@ -64,7 +62,8 @@ public class RumInventoryTunnel implements Tunnel{
     }
 
     /**
-     * Remove a barrel from the tunnel through House A
+     * Removes a barrel from the tunnel through House A, returns the volume of rum in the removed barrel
+     *      * and adjusts neighboring reference variables
      * This method runs in O(1) time
      * throws NoSuchElement exception if the tunnel is empty
      * @return the amount of rum in the barrel that is removed
@@ -93,20 +92,17 @@ public class RumInventoryTunnel implements Tunnel{
             last = middle.next;
         }
         else if (size > 3 && size % 2 == 1){
-            middle = middle.previous;
+            middle = middle.next;
         }
         return amtOfRum;
     }
 
     /**
-     * Add a barrel with amtOfRum to the tunnel from House B
+     * Add a barrel with amtOfRum to the tunnel from House B and adjust neighboring reference variables
      * This method runs in O(1) time
      * @param amtOfRum the amount of rum in this barrel
      */
     public void addB(int amtOfRum) {
-        if (amtOfRum < MIN_VOLUME || MAX_VOLUME < amtOfRum){
-            throw new IllegalArgumentException("Argument must be integer between 0 and 100 inclusive");
-        }
         if (size == MAX_TUNNEL_CAPACITY){throw new IndexOutOfBoundsException("Maximum Tunnel capacity reached");}
         Barrel newBarrel = new Barrel();
         newBarrel.volume = amtOfRum;
@@ -147,7 +143,8 @@ public class RumInventoryTunnel implements Tunnel{
     }
 
     /**
-     * Remove a barrel from the tunnel through House B
+     * Removes a barrel from the tunnel through House B, returns the volume of rum in the removed barrel
+     * and adjusts neighboring reference variables
      * This method runs in O(1) time
      * throws NoSuchElement exception if the tunnel is empty
      * @return the amount of rum in the barrel that is removed
@@ -186,14 +183,11 @@ public class RumInventoryTunnel implements Tunnel{
     }
 
     /**
-     * Add a barrel with amtOfRum to the tunnel from House C
+     * Add a barrel with amtOfRum to the tunnel from House C and adjust neighboring reference variables
      * This method runs in O(1) time
      * @param amtOfRum the amount of rum in this barrel
      */
     public void addC(int amtOfRum) {
-        if (amtOfRum < MIN_VOLUME || MAX_VOLUME < amtOfRum){
-            throw new IllegalArgumentException("Argument must be integer between 0 and 100 inclusive");
-        }
         if (size == MAX_TUNNEL_CAPACITY){throw new IndexOutOfBoundsException("Maximum Tunnel capacity reached");}
         Barrel newBarrel = new Barrel();
         newBarrel.volume = amtOfRum;
@@ -221,7 +215,8 @@ public class RumInventoryTunnel implements Tunnel{
 
     }
     /**
-     * Remove a barrel from the tunnel through House C
+     * Removes a barrel from the tunnel through House C, returns the volume of rum in the removed barrel
+     * and adjusts neighboring reference variables
      * This method runs in O(1) time
      * throws NoSuchElement exception if the tunnel is empty
      * @return the amount of rum in the barrel that is removed
@@ -250,24 +245,28 @@ public class RumInventoryTunnel implements Tunnel{
             first = middle.previous;
         }
         else if (size > 3 && size % 2 == 0){
-            middle = middle.next;
+            middle = middle.previous;
         }
         return amtOfRum;
     }
 
     /**
-     * A simple getter method to return the size of the rum barrel inventory
+     * Get the size of the rum barrel inventory
      * @return the number of barrels in the tunnel
      */
     public int size() {
         return size;
     }
 
-    @Override
+    /**
+     * Get a barrel of rum at a given index and return its volume
+     * @param index the index from 0 to N of the barrel to be retreived
+     * @return volume of the barrel of rum
+     */
     public int get(int index) {
         if (size == 0){throw new NoSuchElementException("Tunnel is empty");}
-        else if (index > size -1 ){throw new NoSuchElementException("Index out of bounds, index must be between zero and" + (size -1));}
-        else if (index < 0){throw new NoSuchElementException("Index out of bounds, index must be between zero and" + (size -1));}
+        else if (index > size -1 ){throw new NoSuchElementException("Index out of bounds");}
+        else if (index < 0){throw new NoSuchElementException("Index out of bounds");}
 
         int result = 0;
         Iterator<Integer> tunnelIter = this.iterator();
@@ -277,32 +276,40 @@ public class RumInventoryTunnel implements Tunnel{
         return result;
     }
 
-    class Barrel{
+    /**
+     * An internal node class called Barrel, which stores position references to previous Barrels and next Barrels
+     * along with the volume of rum contained in the barrel (the data value of the node)
+     */
+    private class Barrel{
 
-        public Integer volume;
+        public int volume;
         public Barrel next;
         public Barrel previous;
     }
 
-    @Override
+    /**
+     * A method to instantiate a new TunnelIterator for the RumInventoryTunnel
+     * @return a new TunnelIterator
+     */
     public Iterator<Integer> iterator() {
-
-        return new TunnelIterator<>();
+        return new TunnelIterator();
     }
 
-    class TunnelIterator<Integer> implements Iterator<Integer> {
+    /**
+     * An internal iterator class that can only move sequentially in a list from 0 to N
+     */
+    private class TunnelIterator implements Iterator<Integer> {
 
         private Barrel position;
-        //private Barrel previous;
-        //private boolean isAfterNext;
 
         public TunnelIterator(){
             position = null;
-            //previous = null;
-            //isAfterNext = false;
         }
 
-        @Override
+        /**
+         * A method that returns true if there is a barrel in the next position to the current barrel
+         * @return return false if the next barrel is null, or true otherwise
+         */
         public boolean hasNext() {
             if (position == null){
                 return first != null;
@@ -312,11 +319,12 @@ public class RumInventoryTunnel implements Tunnel{
             }
         }
 
-        @Override
+        /**
+         *A method that iterates through a list of barrels sequentially with each method call
+         * @return the barrel in the next position to the current barrel;
+         */
         public Integer next() {
             if(hasNext() == false){throw new NoSuchElementException();}
-            //isAfterNext = true;
-            //previous = position;
 
             if(position == null)
             {
@@ -325,7 +333,7 @@ public class RumInventoryTunnel implements Tunnel{
             else{
                 position = position.next;
             }
-            return (Integer) position.volume;
+            return position.volume;
         }
     }
 
