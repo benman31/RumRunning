@@ -7,7 +7,7 @@ public class RumInventoryTimingTests {
 
     //This class has some dependence on the size of the heap
 
-    static final int SMALL_TIMEOUT = 60;//THIS SHOULD BE ADJUSTED AS PER THE COMPUTER RUNNING THE TESTS
+    static final int SMALL_TIMEOUT = 100;//THIS SHOULD BE ADJUSTED AS PER THE COMPUTER RUNNING THE TESTS
     static final int LARGE_TIMEOUT = SMALL_TIMEOUT * 20; //ALLOW SOME LEEWAY
 
     final int SMALL_MAX = 1000000;//1 MILLION!
